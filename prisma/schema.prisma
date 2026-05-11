@@ -1,9 +1,55 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Form
+// The top-level entity that a micro-business owner creates
+// ---------------------------------------------------------------------------
+model Form {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String   @default("Untitled Form")
+  fields    Json // JSONB – flexible field definitions (see typing below)
+  pinHash   String   @map("pin_hash")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  submissions Submission[]
+
+  @@index([slug])
+  @@map("forms")
+}
+
+// ---------------------------------------------------------------------------
+// Submission
+// One row per end-customer form fill
+// ---------------------------------------------------------------------------
+model Submission {
+  id        String    @id @default(cuid())
+  formId    String    @map("form_id")
+  data      Json // JSONB – the submitted field values
+  status    Status    @default(UNREAD)
+  repliedAt DateTime? @map("replied_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId, status])
+  @@index([formId, createdAt])
+  @@map("submissions")
+}
+
+// ---------------------------------------------------------------------------
+// Status enum matching PRD: Unread | Read | Replied
+// ---------------------------------------------------------------------------
+enum Status {
+  UNREAD
+  READ
+  REPLIED
 }
