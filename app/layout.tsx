@@ -1,4 +1,4 @@
-import '@/app/ui/globals.css'
+import '@/app/ui/styles/globals.css'
 import Header from '@/app/ui/header';
 
 export default function RootLayout({
@@ -8,9 +8,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="flex flex-col h-screen">
         <Header />
-        {children}
+        <main className="flex-1 overflow-hidden">
+          {children}
+        </main>
       </body>
     </html>
   );
