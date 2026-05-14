@@ -2,7 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { FormField, useFormStore } from '@/app/store/form-store';
 import { GripVertical, Trash2 } from 'lucide-react';
-import { Input } from '@/app/ui/common/input';
+import { Input } from '@/app/ui/input';
 
 interface Props {
     field: FormField;

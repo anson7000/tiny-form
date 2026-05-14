@@ -3,26 +3,26 @@
 import { DndContext, DragEndEvent, closestCenter } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
 import { useFormStore } from "@/app/store/form-store";
-import { Input } from "@/app/ui/common/input";
-import { FieldPalette } from "@/app/ui/field-palette";
-import { SortableField } from "@/app/ui/sortable-field";
-import { Button } from '@/app/ui/common/button';
+import { Input } from "@/app/ui/input";
+import { FieldPalette } from "@/app/ui/builder/field-palette";
+import { SortableField } from "@/app/ui/builder/sortable-field";
 import { useState } from 'react';
-import { Copy, Check, ExternalLink } from 'lucide-react';
+import { PublishModal } from '@/app/ui/builder/publish-modal';
+import { PublishSection } from '@/app/ui/builder/publish-section';
 
-export default function FormBuilder() {
+export function FormBuilder() {
     const {
         formTitle,
         formFields,
-        isPublished,
         formSlug,
+        setFormSlug,
         setFormTitle,
         reorderFields,
-        publishForm
     } = useFormStore();
+    const [showPublishModal, setShowPublishModal] = useState(false);
+    const [shareURL, setShareURL] = useState('');
 
-    const [copied, setCopied] = useState(false);
-
+    // Reroder the fields after drag and drop
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
@@ -34,22 +34,41 @@ export default function FormBuilder() {
         }
     };
 
+    // Show publish modal when publish button is clicked
     const handlePublish = () => {
         if (formFields.length === 0) {
             alert('Please add at least one field to your form');
             return;
         }
-        publishForm();
+        setShowPublishModal(true);
     };
 
-    const copyLink = () => {
-        navigator.clipboard.writeText(`${window.location.origin}/f/${formSlug}`);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    // Handle form publish after PIN confirmation
+    const handlePublishConfirm = async (pin: string) => {
+        try {
+            const response = await fetch('/api/forms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title: formTitle, fields: formFields, pin: pin }),
+            });
 
-    const openForm = () => {
-        window.open(`/f/${formSlug}`, '_blank');
+            const data = await response.json();
+
+            if (!response.ok) {
+                alert(data.error || 'Failed to publish form. Please try again.');
+                return;
+            }
+
+            setShareURL(data.form.shareUrl);
+            setFormSlug(data.form.slug);
+
+        } catch (error) {
+            alert('An unexpected error occurred. Please try again.');
+        }
+        finally {
+            setShowPublishModal(false);
+        }
+
     };
 
     return (
@@ -75,7 +94,7 @@ export default function FormBuilder() {
                     <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-sm p-6">
                         {formFields.length === 0 ? (
                             <div className="text-center text-gray-400 py-12">
-                                <p className="text-lg">Drag fields from the left to build your form</p>
+                                <p className="text-lg">Click fields from the left to build your form</p>
                             </div>
                         ) : (
                             <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -91,34 +110,22 @@ export default function FormBuilder() {
                     </div>
                 </div>
             </div>
-            
+
             {/* Publish Section */}
             <div className="p-6 border-t bg-white">
-                {isPublished ? (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                        <p className="text-green-800 font-semibold mb-2">Form Published! 🎉</p>
-                        <div className="flex items-center gap-2">
-                            <Input
-                                value={`${window.location.origin}/f/${formSlug}`}
-                                readOnly
-                                className="flex-1"
-                            />
-                            <Button onClick={openForm} variant="secondary">
-                                <ExternalLink className="w-4 h-4" />
-                                Open
-                            </Button>
-                            <Button onClick={copyLink} variant="secondary">
-                                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                                {copied ? 'Copied!' : 'Copy'}
-                            </Button>
-                        </div>
-                    </div>
-                ) : (
-                    <Button onClick={handlePublish} className="w-full" size="lg">
-                        Publish Form
-                    </Button>
-                )}
+                <PublishSection
+                    shareURL={shareURL}
+                    formSlug={formSlug}
+                    onPublish={handlePublish}
+                />
             </div>
+
+            {showPublishModal && (
+                <PublishModal
+                    onPublishConfirm={handlePublishConfirm}
+                    onCancel={() => setShowPublishModal(false)}
+                />
+            )}
         </div>
     )
 }

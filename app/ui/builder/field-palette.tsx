@@ -11,6 +11,7 @@ const fieldTypes: Array<{ type: FieldType; label: string; icon: React.ReactNode 
 export function FieldPalette() {
     const addField = useFormStore((state) => state.addField);
 
+    // Handle adding a new field when a field type button is clicked
     const handleAddField = (type: FieldType) => {
         const newField: FormField = {
             id: Math.random().toString(36).slice(2),
