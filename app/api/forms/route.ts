@@ -52,7 +52,6 @@ export async function POST(request: NextRequest) {
                 form: {
                     ...form,
                     shareUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/form/${form.slug}`,
-                    dashboardUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/dashboard/${form.slug}`,
                 },
             },
             { status: 201 }
