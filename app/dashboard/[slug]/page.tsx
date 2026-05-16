@@ -1,33 +1,8 @@
 import { prisma } from "@/app/lib/prisma";
-import { cookies } from "next/headers";
-import { jwtVerify } from "jose/jwt/verify";
 import { SubmissionDashboard } from "@/app/ui/dashboard/submission-dashboard";
 import { Submission } from "@/app/lib/types";
-import { redirect } from "next/navigation";
-
-// Get secret key for JWT signing
-const getSecretKey = () => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET not set");
-  return new TextEncoder().encode(secret);
-};
-
-// Verify JWT token from cookie
-async function verifyAuth(formId: string) {
-  const cookiesStore = await cookies();
-  const token = cookiesStore.get("tinyform_token")?.value;
-
-  if (!token) {
-    return false;
-  }
-
-  try {
-    const { payload } = await jwtVerify(token, getSecretKey());
-    return payload.formId === formId;
-  } catch {
-    return false;
-  }
-}
+import { getPayloadFromToken, verifyAuth } from "@/app/lib/auth";
+import { EntryPage } from "@/app/ui/dashboard/entry-page";
 
 async function fetchSubmissions(formId: string) {
   const submissions = await prisma.submission.findMany({
@@ -55,23 +30,22 @@ export default async function DashboardPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const form = await prisma.form.findUnique({
-    where: { slug },
-    select: { id: true },
-  });
-  if (!form) {
-    // TODO: Show a nicer error page here
-    return <div>Form not found</div>;
+
+  const payload = await getPayloadFromToken();
+
+  if (!payload) {
+    console.log("No valid token found");
+    return <EntryPage />;
   }
 
-  const isAuthenticated = await verifyAuth(form.id);
+  const isAuthenticated = await verifyAuth(payload, slug);
 
   if (!isAuthenticated) {
-    // Redirect to /dashboard
-    redirect("/dashboard");
+    console.log("Authentication failed for slug:", slug);
+    return <EntryPage />;
   }
 
-  const submissions = await fetchSubmissions(form.id);
+  const submissions = await fetchSubmissions(payload.formId as string);
 
   return (
     <SubmissionDashboard submissions={submissions as unknown as Submission[]} />

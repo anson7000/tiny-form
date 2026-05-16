@@ -1,17 +1,13 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/app/lib/prisma";
 import bcrypt from "bcryptjs";
 import { SignJWT } from "jose";
 import { getSecretKey } from "@/app/lib/auth";
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export async function POST(request: NextRequest) {
   try {
-    const { slug } = await params;
     const body = await request.json();
-    const { pin } = body;
+    const { slug, pin } = body;
 
     // Validate PIN format
     if (!pin || !/^\d{4}$/.test(pin)) {
@@ -79,4 +75,22 @@ export async function POST(
       { status: 500 },
     );
   }
+}
+
+export async function DELETE() {
+  const response = NextResponse.json({
+    message: "Logged out successfully",
+  });
+
+  response.cookies.set({
+    name: "tinyform_token",
+    value: "",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0, // Immediately expire
+  });
+
+  return response;
 }

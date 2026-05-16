@@ -1,15 +1,31 @@
 "use client";
 
-import { LayoutGrid, Database } from "lucide-react";
+import { LayoutGrid, Database, LogOut } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
-export function Header() {
+interface HeaderProps {
+  isAuthenticated: boolean;
+}
+
+export function Header({ isAuthenticated }: HeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  const isBuilder = pathname === "/" || pathname === "/builder";
-  const isDashboard = pathname === "/dashboard";
-  const isPublicForm = pathname.startsWith("/f/");
+  const isBuilder = pathname === "/builder";
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isPublicForm = pathname.startsWith("/form");
+
+  const handleLogout = async () => {
+    const response = await fetch("/api/sessions", {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      console.error("Logout failed");
+      return;
+    }
+    router.refresh();
+  };
 
   // Hide header on public form pages
   if (isPublicForm) {
@@ -39,6 +55,7 @@ export function Header() {
               Form Builder
             </div>
           </Link>
+
           <Link href="/dashboard">
             <div
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -51,6 +68,16 @@ export function Header() {
               Dashboard
             </div>
           </Link>
+
+          {isAuthenticated && (
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors ml-2"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </nav>
       </div>
     </header>

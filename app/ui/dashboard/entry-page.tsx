@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Input } from "@/app/ui/input";
 import { Button } from "@/app/ui/button";
 import { Database, AlertCircle } from "lucide-react";
+import { redirect, useRouter } from "next/navigation";
 
 export function EntryPage() {
+  const router = useRouter();
   const [slug, setSlug] = useState("");
   const [pin, setPin] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
@@ -49,12 +51,12 @@ export function EntryPage() {
       return;
     }
 
-    const response = await fetch(`/api/forms/${slug.trim()}/auth`, {
+    const response = await fetch(`/api/sessions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ pin: pinValue }),
+      body: JSON.stringify({ slug: slug.trim(), pin: pinValue }),
     });
 
     const data = await response.json();
@@ -70,7 +72,9 @@ export function EntryPage() {
       return;
     }
 
-    window.location.href = `/dashboard/${slug.trim()}`;
+    const redirectUrl = data.redirectUrl || `/dashboard/${slug.trim()}`;
+    router.refresh();
+    redirect(redirectUrl);
   };
 
   return (
