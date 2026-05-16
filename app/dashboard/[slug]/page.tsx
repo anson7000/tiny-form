@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { jwtVerify } from "jose/jwt/verify";
 import { SubmissionDashboard } from "@/app/ui/dashboard/submission-dashboard";
 import { Submission } from "@/app/lib/types";
+import { redirect } from "next/navigation";
 
 // Get secret key for JWT signing
 const getSecretKey = () => {
@@ -67,7 +68,7 @@ export default async function DashboardPage({
 
   if (!isAuthenticated) {
     // Redirect to /dashboard
-    return Response.redirect("/dashboard");
+    redirect("/dashboard");
   }
 
   const submissions = await fetchSubmissions(form.id);
