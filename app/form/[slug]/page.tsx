@@ -19,5 +19,5 @@ export default async function FormPage({ params }: { params: Promise<{ slug: str
     }
     const formFields = form.fields as unknown as FormField[];
 
-    return <PublicForm formTitle={form.title} formFields={formFields} />;
+    return <PublicForm formSlug={form.slug} formTitle={form.title} formFields={formFields} />;
 }

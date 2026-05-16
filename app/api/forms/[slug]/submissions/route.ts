@@ -56,23 +56,11 @@ export async function POST(
             );
         }
 
-        // Spam protection: simple honeypot check
-        if (data._honeypot) {
-            // Silently accept but don't store (bot trap)
-            return NextResponse.json(
-                { message: 'Thank you! Your submission has been received.' },
-                { status: 200 }
-            );
-        }
-
-        // Remove honeypot field before storage
-        const { _honeypot, ...cleanData } = data;
-
         // Create submission
         const submission = await prisma.submission.create({
             data: {
                 formId: form.id,
-                data: cleanData,
+                data: data,
                 status: 'UNREAD',
             },
         });

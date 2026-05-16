@@ -9,15 +9,16 @@ import { CheckCircle } from 'lucide-react';
 
 
 interface PublicFormProps {
+    formSlug: string;
     formTitle: string;
     formFields: FormField[];
 }
 
-export function PublicForm({ formTitle, formFields }: PublicFormProps) {
+export function PublicForm({ formSlug, formTitle, formFields }: PublicFormProps) {
     const [formData, setFormData] = useState<Record<string, string>>({});
     const [submitted, setSubmitted] = useState(false);
 
-    const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         // Validate required fields
@@ -35,6 +36,24 @@ export function PublicForm({ formTitle, formFields }: PublicFormProps) {
         formFields.forEach((field) => {
             submissionData[field.label] = formData[field.id] || '';
         });
+
+        // Submit data to API
+        const response = await fetch(`/api/forms/${formSlug}/submissions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                data: submissionData,
+            }),
+        })
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.error || 'Failed to submit form. Please try again.');
+            return;
+        }
 
         setSubmitted(true);
     };
