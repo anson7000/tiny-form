@@ -1,5 +1,5 @@
-import SubmissionDashboard from '@/app/ui/dashboard/submission-dashboard';
+import { EntryPage } from "@/app/ui/dashboard/entry-page";
 
-export default function DashboardPage() {
-    return <SubmissionDashboard />;
+export default function DashboardEntryPage() {
+  return <EntryPage />;
 }
