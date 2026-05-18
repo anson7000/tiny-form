@@ -44,7 +44,33 @@ export function FormBuilder() {
       alert("Please add at least one field to your form");
       return;
     }
+
+    const labels = formFields.map((field) => field.label.trim().toLowerCase());
+    const emptyLabelCount = labels.filter((label) => label === "").length;
+
+    if (emptyLabelCount > 0) {
+      alert("Please give each field a unique label before publishing.");
+      return;
+    }
+
+    const duplicateLabels = labels.filter(
+      (label, index) => labels.indexOf(label) !== index,
+    );
+
+    if (duplicateLabels.length > 0) {
+      const uniqueDuplicates = Array.from(new Set(duplicateLabels));
+      alert(
+        `Please make each field label unique before publishing. Duplicate labels: ${uniqueDuplicates.join(", ")}`,
+      );
+      return;
+    }
+
     setShowPublishModal(true);
+  };
+
+  const handleClosePublishSection = () => {
+    setFormSlug("");
+    setShareURL("");
   };
 
   // Handle form publish after PIN confirmation
@@ -89,7 +115,7 @@ export function FormBuilder() {
       </div>
 
       {/* Form Builder Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 h-full flex overflow-hidden">
         <div className="w-64 border-r p-4 overflow-y-auto">
           <FieldPalette />
         </div>
@@ -129,6 +155,7 @@ export function FormBuilder() {
           shareURL={shareURL}
           formSlug={formSlug}
           onPublish={handlePublish}
+          onClose={handleClosePublishSection}
         />
       </div>
 

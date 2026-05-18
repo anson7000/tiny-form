@@ -3,18 +3,20 @@
 import { useState } from "react";
 import { Button } from "@/app/ui/button";
 import { Input } from "@/app/ui/input";
-import { ExternalLink, Copy, Check } from "lucide-react";
+import { ExternalLink, Copy, Check, X } from "lucide-react";
 
 interface PublishSectionProps {
   shareURL: string;
   formSlug: string;
   onPublish: () => void;
+  onClose: () => void;
 }
 
 export function PublishSection({
   shareURL,
   formSlug,
   onPublish,
+  onClose,
 }: PublishSectionProps) {
   const [copied, setCopied] = useState<"form" | "dashboard" | null>(null);
   const isPublished = formSlug !== "";
@@ -39,18 +41,30 @@ export function PublishSection({
     <>
       {isPublished ? (
         <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-4">
-          <div>
+          <div className="flex items-start justify-between">
             <p className="text-green-800 font-semibold mb-3">
               Form Published! 🎉
             </p>
-
+            <button
+              onClick={onClose}
+              className="text-green-700 hover:text-green-900 transition-colors"
+              title="Close publish section"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <div>
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Share Form URL (for customers)
                 </label>
                 <div className="flex items-center gap-2">
-                  <Input value={shareURL} readOnly className="flex-1 text-sm" />
+                  <Input
+                    value={`${window.location.origin}/f/${formSlug}`}
+                    readOnly
+                    className="flex-1 text-sm"
+                  />
                   <Button onClick={openForm} variant="secondary" size="sm">
                     <ExternalLink className="w-4 h-4" />
                   </Button>
@@ -66,10 +80,14 @@ export function PublishSection({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Dashboard Slug
+                  Dashboard URL (to view submissions)
                 </label>
                 <div className="flex items-center gap-2">
-                  <Input value={formSlug} readOnly className="flex-1 text-sm" />
+                  <Input
+                    value={`${window.location.origin}/dashboard`}
+                    readOnly
+                    className="flex-1 text-sm"
+                  />
                   <Button
                     onClick={copyDashboardLink}
                     variant="secondary"
@@ -82,6 +100,10 @@ export function PublishSection({
                     )}
                   </Button>
                 </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  Use this URL with your form slug:{" "}
+                  <span className="font-mono font-semibold">{formSlug}</span>
+                </p>
               </div>
             </div>
           </div>

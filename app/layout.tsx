@@ -14,7 +14,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className="flex flex-col h-screen">
         <Header isAuthenticated={isAuthenticated} />
-        <main className="flex-1 overflow-hidden">{children}</main>
+        {children}
       </body>
     </html>
   );

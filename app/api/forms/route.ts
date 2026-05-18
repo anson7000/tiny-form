@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
         message: "Form created successfully",
         form: {
           ...form,
-          shareUrl: `${process.env.NEXT_PUBLIC_BASE_URL}/form/${form.slug}`,
+          shareUrl: `form/${form.slug}`,
         },
       },
       { status: 201 },

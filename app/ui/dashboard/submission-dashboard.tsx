@@ -14,6 +14,7 @@ import { Button } from "@/app/ui/button";
 import { Input } from "@/app/ui/input";
 import { Download, Search } from "lucide-react";
 import { Submission } from "@/app/lib/types";
+import { SubmissionDetailModal } from "@/app/ui/dashboard/submission-detail-modal";
 
 interface SubmissionDashboardProps {
   submissions: Submission[];
@@ -22,58 +23,61 @@ interface SubmissionDashboardProps {
 export function SubmissionDashboard({ submissions }: SubmissionDashboardProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
+
+  const fieldKeys = useMemo(() => {
+    return Object.keys(submissions[0]?.data ?? {}).slice(0, 3);
+  }, [submissions]);
 
   const filteredSubmissions = useMemo(() => {
     return submissions.filter((sub) => {
       const searchLower = searchTerm.toLowerCase();
       const matchesSearch =
         !searchTerm ||
-        Object.values(sub.createdAt).some((val) =>
-          val.toLowerCase().includes(searchLower),
+        fieldKeys.some((key) =>
+          (sub.data[key] ?? "").toLowerCase().includes(searchLower),
         );
       return matchesSearch;
     });
-  }, [submissions, searchTerm]);
+  }, [submissions, searchTerm, fieldKeys]);
 
   const columnHelper = createColumnHelper<Submission>();
 
-  const columns = [
-    columnHelper.accessor("createdAt", {
-      header: "Timestamp",
-      cell: (info) => new Date(info.getValue()).toLocaleString(),
-    }),
-    columnHelper.accessor(
-      (row) => row.data.name || Object.values(row.data)[0],
-      {
-        id: "name",
-        header: "Name",
-        cell: (info) => info.getValue(),
-      },
-    ),
-    columnHelper.accessor(
-      (row) => row.data.email || Object.values(row.data)[1],
-      {
-        id: "email",
-        header: "Email",
-        cell: (info) => info.getValue(),
-      },
-    ),
-    columnHelper.accessor(
-      (row) => row.data.message || Object.values(row.data)[2],
-      {
-        id: "message",
-        header: "Message",
-        cell: (info) => {
-          const msg = info.getValue() || "";
-          return (
-            <div className="max-w-md" title={msg}>
-              {msg}
-            </div>
-          );
-        },
-      },
-    ),
-  ];
+  const formatTimestamp = (value: string | Date) =>
+    new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+    }).format(new Date(value));
+
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("createdAt", {
+        header: "Timestamp",
+        cell: (info) => formatTimestamp(info.getValue()),
+      }),
+      ...fieldKeys.map((key) =>
+        columnHelper.accessor((row) => row.data[key] ?? "", {
+          id: key,
+          header: key,
+          cell: (info) => {
+            const value = info.getValue() || "";
+            return (
+              <div className="max-w-md truncate" title={value}>
+                {value}
+              </div>
+            );
+          },
+        }),
+      ),
+    ],
+    [columnHelper, fieldKeys],
+  );
 
   const table = useReactTable({
     data: filteredSubmissions,
@@ -110,7 +114,7 @@ export function SubmissionDashboard({ submissions }: SubmissionDashboardProps) {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col ">
       <div className="p-6 border-b bg-white">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -161,7 +165,11 @@ export function SubmissionDashboard({ submissions }: SubmissionDashboardProps) {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => (
-                <tr key={row.id} className="border-b hover:bg-gray-50">
+                <tr
+                  key={row.id}
+                  className="border-b hover:bg-gray-50 cursor-pointer transition-colors"
+                  onClick={() => setSelectedSubmission(row.original)}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td key={cell.id} className="p-4 text-sm">
                       {flexRender(
@@ -182,6 +190,13 @@ export function SubmissionDashboard({ submissions }: SubmissionDashboardProps) {
           )}
         </div>
       </div>
+
+      {selectedSubmission && (
+        <SubmissionDetailModal
+          submission={selectedSubmission}
+          onClose={() => setSelectedSubmission(null)}
+        />
+      )}
     </div>
   );
 }

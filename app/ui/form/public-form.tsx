@@ -94,7 +94,7 @@ export function PublicForm({
             <p className="text-gray-600">Please fill out the form below</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 overeflow-y-auto">
             {formFields.map((field) => (
               <div key={field.id}>
                 <label className="block text-sm font-semibold mb-2">
