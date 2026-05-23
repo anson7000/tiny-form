@@ -49,8 +49,7 @@ export async function POST(request: NextRequest) {
       {
         message: "Form created successfully",
         form: {
-          ...form,
-          shareUrl: `form/${form.slug}`,
+          ...form
         },
       },
       { status: 201 },

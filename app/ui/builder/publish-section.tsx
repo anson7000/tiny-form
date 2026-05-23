@@ -6,14 +6,12 @@ import { Input } from "@/app/ui/input";
 import { ExternalLink, Copy, Check, X } from "lucide-react";
 
 interface PublishSectionProps {
-  shareURL: string;
   formSlug: string;
   onPublish: () => void;
   onClose: () => void;
 }
 
 export function PublishSection({
-  shareURL,
   formSlug,
   onPublish,
   onClose,
@@ -22,11 +20,11 @@ export function PublishSection({
   const isPublished = formSlug !== "";
 
   const openForm = () => {
-    window.open(shareURL, "_blank");
+    window.open(`${window.location.origin}/form/${formSlug}`, "_blank");
   };
 
   const copyFormLink = () => {
-    navigator.clipboard.writeText(shareURL);
+    navigator.clipboard.writeText(`${window.location.origin}/form/${formSlug}`);
     setCopied("form");
     setTimeout(() => setCopied(null), 2000);
   };

@@ -24,7 +24,6 @@ export function FormBuilder() {
     reorderFields,
   } = useFormStore();
   const [showPublishModal, setShowPublishModal] = useState(false);
-  const [shareURL, setShareURL] = useState("");
 
   // Reroder the fields after drag and drop
   const handleDragEnd = (event: DragEndEvent) => {
@@ -70,7 +69,6 @@ export function FormBuilder() {
 
   const handleClosePublishSection = () => {
     setFormSlug("");
-    setShareURL("");
   };
 
   // Handle form publish after PIN confirmation
@@ -93,7 +91,6 @@ export function FormBuilder() {
         return;
       }
 
-      setShareURL(data.form.shareUrl);
       setFormSlug(data.form.slug);
     } catch (error) {
       alert("An unexpected error occurred. Please try again.");
@@ -116,7 +113,7 @@ export function FormBuilder() {
 
       {/* Form Builder Area */}
       <div className="flex-1 h-full flex overflow-hidden">
-        <div className="w-64 border-r p-4 overflow-y-auto">
+        <div className="w-64 border-r p-4 overflow-y-auto hidden md:flex">
           <FieldPalette />
         </div>
 
@@ -152,7 +149,6 @@ export function FormBuilder() {
       {/* Publish Section */}
       <div className="p-6 border-t bg-white">
         <PublishSection
-          shareURL={shareURL}
           formSlug={formSlug}
           onPublish={handlePublish}
           onClose={handleClosePublishSection}
