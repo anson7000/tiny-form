@@ -100,25 +100,26 @@ export function SortableField({ field }: Props) {
             />
           )}
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={field.required}
-              onChange={(e) =>
-                updateField(field.id, { required: e.target.checked })
-              }
-              className="rounded"
-            />
-            <span className="text-gray-600">Required field</span>
-          </label>
+          <div className="flex justify-between">
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={field.required}
+                onChange={(e) =>
+                  updateField(field.id, { required: e.target.checked })
+                }
+                className="rounded"
+              />
+              <span className="text-gray-600">Required field</span>
+            </label>
+            <button
+              onClick={() => removeField(field.id)}
+              className="mt-2 text-gray-400 hover:text-red-600"
+            >
+              <Trash2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={() => removeField(field.id)}
-          className="mt-2 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          <Trash2 className="w-5 h-5" />
-        </button>
       </div>
     </div>
   );

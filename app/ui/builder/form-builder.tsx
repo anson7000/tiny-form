@@ -13,6 +13,8 @@ import { SortableField } from "@/app/ui/builder/sortable-field";
 import { useState } from "react";
 import { PublishModal } from "@/app/ui/builder/publish-modal";
 import { PublishSection } from "@/app/ui/builder/publish-section";
+import { Button } from "@/app/ui/button";
+import { BottomSheet } from "@/app/ui/builder/bottom-sheet";
 
 export function FormBuilder() {
   const {
@@ -24,6 +26,7 @@ export function FormBuilder() {
     reorderFields,
   } = useFormStore();
   const [showPublishModal, setShowPublishModal] = useState(false);
+  const [isOpenBottomSheet, setIsOpenBottomSheet] = useState(false);
 
   // Reroder the fields after drag and drop
   const handleDragEnd = (event: DragEndEvent) => {
@@ -65,10 +68,6 @@ export function FormBuilder() {
     }
 
     setShowPublishModal(true);
-  };
-
-  const handleClosePublishSection = () => {
-    setFormSlug("");
   };
 
   // Handle form publish after PIN confirmation
@@ -113,7 +112,7 @@ export function FormBuilder() {
 
       {/* Form Builder Area */}
       <div className="flex-1 h-full flex overflow-hidden">
-        <div className="w-64 border-r p-4 overflow-y-auto hidden md:flex">
+        <div className="w-64 border-r p-4 overflow-y-auto hidden md:block">
           <FieldPalette />
         </div>
 
@@ -147,12 +146,36 @@ export function FormBuilder() {
       </div>
 
       {/* Publish Section */}
-      <div className="p-6 border-t bg-white">
+      <div className="p-6 border-t bg-white hidden md:block">
         <PublishSection
           formSlug={formSlug}
           onPublish={handlePublish}
-          onClose={handleClosePublishSection}
+          onClose={() => setFormSlug("")}
         />
+      </div>
+
+      <div className="p-6 border-t bg-white md:hidden">
+        <BottomSheet
+          isOpen={isOpenBottomSheet}
+          onClose={() => setIsOpenBottomSheet(false)}
+        >
+          <div className="flex flex-col gap-6 p-4">
+            <FieldPalette />
+            <PublishSection
+              formSlug={formSlug}
+              onPublish={handlePublish}
+              onClose={() => setFormSlug("")}
+            />
+          </div>
+        </BottomSheet>
+
+        <Button
+          onClick={() => setIsOpenBottomSheet(true)}
+          className="w-full"
+          size="lg"
+        >
+          Add Fields
+        </Button>
       </div>
 
       {showPublishModal && (
