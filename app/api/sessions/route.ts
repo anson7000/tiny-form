@@ -17,9 +17,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Rate limiting check (simple in-memory - use Redis in production)
-    // TODO: Implement proper rate limiting for production
-
     // Find the form
     const form = await prisma.form.findUnique({
       where: { slug },
@@ -30,7 +27,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (!form) {
-      // Use same error message to prevent form enumeration
       return NextResponse.json({ error: "Invalid PIN" }, { status: 401 });
     }
 
@@ -41,7 +37,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid PIN" }, { status: 401 });
     }
 
-    // Create JWT token (short-lived: 24 hours)
+    // Create JWT token
     const token = await new SignJWT({
       formId: form.id,
       slug: slug,
@@ -64,7 +60,7 @@ export async function POST(request: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24, // 24 hours
+      maxAge: 60 * 60 * 24,
     });
 
     return response;
@@ -89,7 +85,7 @@ export async function DELETE() {
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 0, // Immediately expire
+    maxAge: 0,
   });
 
   return response;

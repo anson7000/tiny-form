@@ -1,28 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { jwtVerify } from "jose";
-
-const getSecretKey = () => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error("JWT_SECRET not set");
-  return new TextEncoder().encode(secret);
-};
-
-// Verify JWT token from cookie
-async function verifyAuth(request: NextRequest, formId: string) {
-  const token = request.cookies.get("tinyform_token")?.value;
-
-  if (!token) {
-    return false;
-  }
-
-  try {
-    const { payload } = await jwtVerify(token, getSecretKey());
-    return payload.formId === formId;
-  } catch {
-    return false;
-  }
-}
 
 // POST - Public form submission
 export async function POST(
