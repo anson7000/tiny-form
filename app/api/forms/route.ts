@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate unique slug
-    const slug = nanoid(8); // e.g., "V1StGXR8"
+    const slug = nanoid(8);
 
     // Hash the PIN
     const pinHash = await bcrypt.hash(pin, 10);
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       data: {
         slug,
         title,
-        fields, // JSONB - Prisma handles serialization
+        fields,
         pinHash,
       },
       select: {
