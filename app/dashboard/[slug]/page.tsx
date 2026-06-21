@@ -13,8 +13,6 @@ async function fetchSubmissions(formId: string) {
     select: {
       id: true,
       data: true,
-      status: true,
-      repliedAt: true,
       createdAt: true,
     },
   });

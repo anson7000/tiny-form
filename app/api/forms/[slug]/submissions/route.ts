@@ -34,7 +34,6 @@ export async function POST(
       data: {
         formId: form.id,
         data: data,
-        status: "UNREAD",
       },
     });
 
